@@ -71,8 +71,6 @@ spec:
     runAfter:
       - test
     params:
-      - name: DOCKERFILE_PATH
-        value: "./Dockerfile"
       - name: IMAGE_TAG
         value: "$(params.imageTag)"
     resources:
