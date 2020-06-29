@@ -4,3 +4,4 @@ metadata:
   name: reversewords-pipeline
 secrets:
   - name: quay-user-pass
+  - name: argo-crd

@@ -40,8 +40,6 @@ spec:
     type: git
   - name: app-image
     type: image
-  - name: app-argo
-    type: git
   params:
   - name: imageTag
     type: string
@@ -85,8 +83,6 @@ spec:
     runAfter:
       - test
     params:
-      - name: DOCKERFILE_PATH
-        value: "./Dockerfile"
       - name: IMAGE_TAG
         value: "$(params.imageTag)"
     resources:
@@ -96,7 +92,6 @@ spec:
       outputs:
       - name: image
         resource: app-image
-
   - name: trigger-stage
     taskRef:
       name: trigger-stage
@@ -107,7 +102,8 @@ spec:
         value: "$(params.imageTag)"
     resources:
       inputs:
-      - name: argosource
-        resource: app-argo
+      - name: source
+        resource: argo-git
+      outputs:
       - name: image
         resource: app-image

@@ -2,11 +2,14 @@ apiVersion: tekton.dev/v1alpha1
 kind: PipelineRun
 metadata:
   generateName: reverse-words-build-pipeline-run-
+  name: pipeline-mihai
 spec:
   pipelineRef:
     name: reverse-words-build-pipeline
   serviceAccountNames:
     - taskName: build-and-push
+      serviceAccountName: reversewords-pipeline
+    - taskName: trigger-stage
       serviceAccountName: reversewords-pipeline
   params:
     - name: imageTag
@@ -15,6 +18,9 @@ spec:
     - name: app-git
       resourceRef:
         name: reverse-words-git
+    - name: app-argo
+      resourceRef:
+        name: reverse-words-argo
     - name: app-image
       resourceRef:
         name: reverse-words-image
