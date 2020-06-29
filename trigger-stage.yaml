@@ -31,15 +31,20 @@ spec:
     image: ubuntu 
     script: |
       #!/bin/bash
+      echo "Installing GIT Core"
       apt-get -y update
-      apt-get -y install git-core
-      echo "Before cat"
-      sed -i  "s/\(.*:.*:\).*/\1$(cat /workspace/source/.git/refs/heads/master)/" deployment.yaml
+      apt-get -y install git-core screen
+      echo "Setting basic GIT params"
       git config --global user.email "lists@mihai.tech"
       git config --global user.name "mihaime"
+      git fetch
+      git branch -a
+      git checkout stage
+      echo "Updating Deployment for Argo"
+      sed -i  "s/\(.*:.*:\).*/\1$(cat /workspace/source/.git/refs/heads/master)/" deployment.yaml
       git add deployment.yaml
       git commit -m "adjusted stage to new container image $(cat /workspace/source/.git/refs/heads/master)"
-      git push origin stage || { echo "failed to push"; exit 1; }
+      git push || { echo "failed to push"; exit 1; }
       echo "Finished argo stage"
     securityContext:
       privileged: true

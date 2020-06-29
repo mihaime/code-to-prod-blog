@@ -30,6 +30,8 @@ spec:
         params:
         - name: revision
           value: stage
+        - name: refspec
+          value: refs/heads/stage:refs/heads/stage
         - name: url
           value: https://github.com/mihaime/code-to-prod-blog
     - apiVersion: tekton.dev/v1alpha1
