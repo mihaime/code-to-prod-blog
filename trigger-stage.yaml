@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argo-crd
+  annotations:
+    tekton.dev/git-0: https://github.com # Described below
+type: kubernetes.io/basic-auth
+stringData:
+  username: mihaime
+  password: Mihai4HPE-neah!
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: trigger-stage
+spec:
+  inputs:
+    resources:
+    - name: argosource
+      type: git
+    - name: source
+      type: git
+    params:
+    - name: IMAGE_TAG
+      description: Tag for the built image
+      default: latest
+
+  steps:
+  - name: argo-stage
+    workingdir: /workspace/argosource
+    image: ubuntu 
+    script: |
+      #!/bin/bash
+      apt-get -y update
+      apt-get -y install git-core
+      echo "Before cat"
+      sed -i  "s/\(.*:.*:\).*/\1$(cat /workspace/source/.git/refs/heads/master)/" deployment.yaml
+      git config --global user.email "lists@mihai.tech"
+      git config --global user.name "mihaime"
+      git add deployment.yaml
+      git commit -m "adjusted stage to new container image $(cat /workspace/source/.git/refs/heads/master)"
+      git push || { echo "failed to push"; exit 1; }
+      echo "Finished argo stage"
+    securityContext:
+      privileged: true
