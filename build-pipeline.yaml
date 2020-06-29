@@ -109,5 +109,5 @@ spec:
       inputs:
       - name: argosource
         resource: app-argo
-      - name: image
-        resource: app-image
+      - name: source
+        resource: app-git

@@ -18,8 +18,8 @@ spec:
     resources:
     - name: argosource
       type: git
-    - name: image
-      type: image
+    - name: source
+      type: git
     params:
     - name: IMAGE_TAG
       description: Tag for the built image
@@ -27,10 +27,12 @@ spec:
 
   steps:
   - name: argo-stage
-    image: quay.io/buildah/upstream
+    image: ubuntu
     workingdir: /workspace/argosource
     script: |
       #!/bin/bash
+      echo "Before cat"
+      cat /workspace/source/.git/refs/heads/master
       echo "Finished argo stage"
     securityContext:
       privileged: true

@@ -22,6 +22,17 @@ spec:
         - name: url
           value: $(params.gitrepositoryurl)
     - apiVersion: tekton.dev/v1alpha1
+      kind: PipelineResource
+      metadata:
+        name: reversewords-argo-$(uid)
+      spec:
+        type: git
+        params:
+        - name: revision
+          value: stage
+        - name: url
+          value: https://github.com/mihaime/code-to-prod-blog
+    - apiVersion: tekton.dev/v1alpha1
       kind: PipelineRun
       metadata:
         name: reversewords-build-pipeline-run-$(uid)
@@ -30,6 +41,8 @@ spec:
           name: reverse-words-build-pipeline
         serviceAccountNames:
           - taskName: build-and-push
+            serviceAccountName: reversewords-pipeline
+          - taskName: trigger-stage
             serviceAccountName: reversewords-pipeline
         params:
           - name: imageTag
@@ -41,6 +54,9 @@ spec:
           - name: app-image
             resourceRef:
               name: reverse-words-image
+          - name: app-argo
+            resourceRef:
+              name: reversewords-argo-$(uid)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
