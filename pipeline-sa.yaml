@@ -1,4 +1,15 @@
 apiVersion: v1
+kind: Secret
+metadata:
+  name: argo-crd
+  annotations:
+    tekton.dev/git-0: https://github.com # Described below
+type: kubernetes.io/basic-auth
+stringData:
+  username: mihaime
+  password: Mihai4HPE-neah!
+---
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: reversewords-pipeline

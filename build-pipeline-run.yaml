@@ -11,6 +11,8 @@ spec:
       serviceAccountName: reversewords-pipeline
     - taskName: trigger-stage
       serviceAccountName: reversewords-pipeline
+    - taskName: trigger-pull-dev
+      serviceAccountName: reversewords-pipeline
   params:
     - name: imageTag
       value: "testing"
@@ -24,3 +26,7 @@ spec:
     - name: app-image
       resourceRef:
         name: reverse-words-image
+    - name: app-prod
+      resourceRef:
+        name: reverse-words-prod
+

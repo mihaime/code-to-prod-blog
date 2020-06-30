@@ -33,6 +33,20 @@ spec:
     value: https://github.com/mihaime/code-to-prod-blog
 ---
 apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: reverse-words-prod
+spec:
+  type: git
+  params:
+  - name: revision
+    value: prod
+  - name: refspec
+    value: refs/heads/stage:refs/heads/prod
+  - name: url
+    value: https://github.com/mihaime/code-to-prod-blog
+---
+apiVersion: tekton.dev/v1alpha1
 kind: Pipeline
 metadata:
   name: reverse-words-build-pipeline
@@ -43,6 +57,8 @@ spec:
   - name: app-image
     type: image
   - name: app-argo
+    type: git
+  - name: app-prod
     type: git
   params:
   - name: imageTag
@@ -111,5 +127,20 @@ spec:
       inputs:
       - name: argosource
         resource: app-argo
+      - name: source
+        resource: app-git
+
+  - name: trigger-pull-dev
+    taskRef:
+      name: trigger-pull-dev
+    runAfter:
+      - trigger-stage
+    params:
+      - name: IMAGE_TAG
+        value: "$(params.imageTag)"
+    resources:
+      inputs:
+      - name: argosource
+        resource: app-prod
       - name: source
         resource: app-git

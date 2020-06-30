@@ -1,0 +1,49 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: trigger-pull-dev
+spec:
+  inputs:
+    resources:
+    - name: argosource
+      type: git
+    - name: source
+      type: git
+    params:
+    - name: IMAGE_TAG
+      description: Tag for the built image
+      default: latest
+
+  steps:
+  - name: pull-dev
+    workingdir: /workspace/argosource
+    image: ubuntu 
+    script: |
+      #!/bin/bash
+      echo "Installing GIT Core"
+      apt-get -y update
+      apt-get -y install git-core
+      echo "Installing Github utility"
+      apt-get -y install hub
+      echo "Setting basic GIT params"
+      git config --global user.email "lists@mihai.tech"
+      git config --global user.name "mihaime"
+      branchid=$(date '+%s')
+      version=$(grep -i "version =" /source/main.go | cut -d "=" -f 2 | tr -d " " | tr -d '"')
+      git fetch
+      git checkout prod
+      git checkout -b prod-$branchid prod || git checkout prod-$branchid || { echo "failed to checkout"; exit 1; }
+      echo "Updating Deployment for Argo"
+      sed -i  "s/\(.*:.*:\).*/\1$(cat /workspace/source/.git/refs/heads/master)/" deployment.yaml
+      # DEBUGGING CAVEMAN STYLE
+      #sleep 999999999
+      git add deployment.yaml
+      git commit -m "just another update with $(cat /workspace/source/.git/refs/heads/master)"
+      git push -f --set-upstream origin prod-$branchid || { echo "failed to push"; exit 1; }
+      pass=$(sed -n  's/.*mihaime:\(.*\)@.*/\1/p' ~/.git-credentials)
+      export GITHUB_PASSWORD=$(printf "%b\n" "${pass//%/\\x}")       
+      export GITHUB_USER=mihaime
+      hub pull-request -b prod -m "Automatic Pull Request from Tekton for version $version" -m "This is the greatest commit: $(cat /workspace/source/.git/refs/heads/master)" || { echo "failed to create a PULL Request"; exit 1; } 
+      echo "Finished pull-dev stage"
+    securityContext:
+      privileged: true
